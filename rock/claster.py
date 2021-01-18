@@ -2,8 +2,6 @@ import collections
 from collections import namedtuple  
 
 Cluster = namedtuple('Cluster', ['g', 'id', 'points'])
-Point = namedtuple('Point', ['index', 'value'])
-
 
 def to_cluster_list(S):
     cluster_list = []

@@ -1,5 +1,4 @@
-from links import *
-from links.Link import Link
+from rock.link import Link
 
 
 def test_create_nbrlist():

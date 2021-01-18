@@ -5,7 +5,7 @@ from rock.Rock import Rock
 #     rock.cluster([3, 4, 5, 10], 2)
 #     assert True
 def test_claster():
-    rock = Rock(data=[3, 5, 8, 9], eps=4, number_of_clasters=2 )
+    rock = Rock(eps=4)
     rock.cluster([3, 5, 8, 9], 2)
     assert True
 
