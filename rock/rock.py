@@ -1,38 +1,44 @@
 from rock.link import Link
 from rock.heap_wrapper import HeapWrapper
 from rock.goodnes_measure import GoodnessMeasure
-from rock.claster import *
+from rock.cluster import *
 from heapq import *
+import numpy as np
 
 class Rock():
-    def __init__(self, eps, threshold=0.5):
-        self._eps = eps
-        self._threshold = threshold
-        self._scaling_factor = 1.0 + 2.0 * ((1.0 - threshold) / (1.0 + threshold))
+    def __init__(self, is_cat, threshold=0.5):
+        self.threshold = threshold
+        self._eps = threshold
+        self._scaling_factor = 1.0 + 2.0 * ((1.0 - self.threshold) / (1.0 + self.threshold))
+        self._is_cat = is_cat
 
     def cluster(self, S, k):
-        heap_wrapper = HeapWrapper()
-        goodens_measure = GoodnessMeasure()
+        goodens_measure = GoodnessMeasure(self.threshold)
+        heap_wrapper = HeapWrapper(goodens_measure)
+
         clusters = to_cluster_list(S)
 
-        link_mat = Link(eps=self._eps).compute_links(data=S)
+        link_mat = Link(self._is_cat).compute_links(data=S, eps=self._eps)
+        max_index = len(S)
 
-        #array of heaps
         local_heap_dict = {}
 
         for cluster in clusters:
-            local_heap_dict[cluster.id] = heap_wrapper.build_local_heap2(link_mat, cluster)
+            local_heap_dict[cluster.id] = heap_wrapper.build_local_heap(link_mat, cluster)
 
         global_heap = heap_wrapper.build_global_heap(link_mat, clusters, local_heap_dict)
 
         while len(global_heap) > k:
-
-            u = heappop(global_heap)[1]
+            if len(global_heap) % 20 == 0:
+                print(len(global_heap))
+            if len(link_mat) == 0:
+                break
+            u = heappop(global_heap)
             v = min(local_heap_dict[u.id])
 
-            heap_wrapper.delete_from_global(global_heap, v.id)
-
-            w = Cluster(g=0, id=max(v.id, u.id)+10, points=u.points + v.points)
+            heap_wrapper.delete(global_heap, v.id)
+            max_index+=1
+            w = Cluster(g=0, id=max_index, points=u.points + v.points)
             local_heap_dict[w.id] = []
             cluster_heap_union = heap_wrapper.union_of_heaps(local_heap_dict[u.id], local_heap_dict[v.id])
 
@@ -49,8 +55,8 @@ class Rock():
                         else:
                             link_mat[w.id] = {x.id: gm}
 
-                    heap_wrapper.delete_from_local(local_heap_dict[x.id], u.id)
-                    heap_wrapper.delete_from_local(local_heap_dict[x.id], v.id)
+                    heap_wrapper.delete(local_heap_dict[x.id], u.id)
+                    heap_wrapper.delete(local_heap_dict[x.id], v.id)
                     goodnes = goodens_measure.gm(link_mat, x, w)
                     heap_wrapper.insert(local_heap_dict[x.id], w, goodnes)
                     heap_wrapper.insert(local_heap_dict[w.id], x, goodnes)
@@ -64,10 +70,14 @@ class Rock():
                 if i == u.id or i == v.id:
                     del link_mat[i]
                 else:
-                    link2_i_keys = list(link_mat[i].keys())
-                    for j in link2_i_keys:
-                        if j == u.id or j == v.id:
-                            del link_mat[i][j]
+                    if u.id in link_mat[i]:
+                        del link_mat[i][u.id]
+                    elif v.id in link_mat[i]:
+                        del link_mat[i][v.id]
+                    if len(link_mat[i]) == 0:
+                        del link_mat[i]
+
+        return global_heap
 
 
 

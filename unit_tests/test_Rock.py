@@ -1,15 +1,9 @@
-from rock.Rock import Rock
+from rock.rock import Rock
+import numpy as np
 
-# def test_claster():
-#     rock = Rock(data=[3, 4, 5, 10], eps=4, number_of_clasters=2 )
-#     rock.cluster([3, 4, 5, 10], 2)
-#     assert True
 def test_claster():
-    rock = Rock(eps=4)
-    rock.cluster([3, 5, 8, 9], 2)
-    assert True
-
-# def test_claster():
-#     rock = Rock(data=[3, 5, 9], eps=4, number_of_clasters=2 )
-#     rock.cluster([3, 5, 7], 2)
-#     assert True
+    rock = Rock(is_cat=False, threshold=0.8)
+    clusers = rock.cluster(np.array([[0],[1],[2],[3],[4],[5],
+                            [10],[11],[12],[13],[14],
+                            [15], [100]]), 3)
+    assert len(clusers) == 3
