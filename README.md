@@ -5,4 +5,4 @@
 2. ...
 
 ## Documentation in Polish
-1. Rock-alg.pdf
+1. ROCK-alg.pdf
