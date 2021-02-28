@@ -3,3 +3,6 @@
 ## Requirements 
 1. Python 3
 2. ...
+
+## Documentation in Polish
+1. Rock-alg.pdf
